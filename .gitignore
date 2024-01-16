@@ -1,0 +1,15 @@
+# files
+GPDB Export_2023.08.16.csv
+cleanup_sample.csv
+GPDB-cleanup-prepped.csv
+gpdb_cleanup_TEST_first200.csv
+
+# folders
+/DNU/
+/certs/
+/venv/
+
+# misc
+*~
+*.pyc
+.DS_Store
