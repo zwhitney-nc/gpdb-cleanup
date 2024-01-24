@@ -13,3 +13,4 @@ gpdb_cleanup_TEST_first200.csv
 *~
 *.pyc
 .DS_Store
+__pycache__
