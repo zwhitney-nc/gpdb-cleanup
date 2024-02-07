@@ -74,17 +74,17 @@ import os
 
 ### user variables
 #check these before running
-breakpoint()
+#breakpoint()
 
 input_fn = "db-exports/GPDB-cleanup-prepped.csv"
 output_fn = 'db-exports/gpdb_cleanup_OUTPUT.csv'
 key_fn = "/home/ubuntu/gpdb-cleanup/certs/gpdb-cleanup-key.json"
-git_commit_hash = 'e536cc119628b22a82f8cc07a0730584bf47b6af'
+git_commit_hash = '151d4ef'
 
 df = pd.read_csv(input_fn)
-df = df[:300].copy()
-start = 200
-step = 100
+#df = df[:300].copy()
+start = 300
+step = 1000
 
 #currently just hard-coding these, but you can update if needed
 os.system(f'gcloud auth activate-service-account gpdb-cleanup@gpdb-cleanup.iam.gserviceaccount.com --key-file {key_fn}')
