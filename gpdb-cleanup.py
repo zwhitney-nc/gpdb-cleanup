@@ -238,26 +238,21 @@ def process_names(df: pd.DataFrame,
         targets.append("no")
         confs.append(100)
         continue
-
-  """end = timeit.default_timer()
-  timeElapsed = end - start
-
-  print(f'took {timeElapsed} seconds for {len(namekeys)} names, {len(namekeys)/timeElapsed} names per second')"""
-
-  # print(list(zip(targets, namekeys[:200]))[:len(sil)], sil, confs)
-  # print(list(zip(sil, namekeys))[:len(sil)], targets, confs)
+      
 
   #package up results and write to new CSV
-
-  # print(len(is_sil.values), len(df))
-  #dfnew = df.loc[df["created_at"].str.startswith("2020")][:200]
+  df_old = pd.read_csv(output_fn)  
+  
   dfnew = df.copy()
   index_values = dfnew.index
   dfnew["is_silent"] = pd.Series(np.array(sil), index=index_values)
   dfnew["is_target"] = pd.Series(np.array(targets), index=index_values)
   dfnew["target_confidence_%"] = pd.Series(np.array(confs), index=index_values)
+  dfnew["git_commit_hash"] = git_commit_hash
 
-  dfnew.to_csv(output_fn, header=False, index = False, mode='a') #maybe move this out of the method?
+  df_output = pd.concat([df_old, dfnew])
+  
+  df_output.to_csv(output_fn, index = False) #maybe move this out of the method?
 
 
 ### loop for working through dataset
