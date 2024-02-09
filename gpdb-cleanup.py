@@ -66,8 +66,10 @@ import numpy as np
 from google.oauth2 import service_account
 import six
 from google.cloud import translate_v2 as translate
+from google.api_core.exceptions import GoogleAPIError
 
 import timeit
+from time import sleep
 
 import os
 
@@ -79,11 +81,11 @@ import os
 input_fn = "db-exports/GPDB-cleanup-prepped.csv"
 output_fn = 'db-exports/gpdb_cleanup_OUTPUT.csv'
 key_fn = "/home/ubuntu/gpdb-cleanup/certs/gpdb-cleanup-key.json"
-git_commit_hash = '151d4ef'
+git_commit_hash = '26fb154'
 
 df = pd.read_csv(input_fn)
 #df = df[:300].copy()
-start = 300
+start = 199300
 step = 1000
 
 #currently just hard-coding these, but you can update if needed
@@ -156,7 +158,18 @@ def pre_transliterate(word):
   if isinstance(word, six.binary_type):
       text = text.decode("utf-8")
   print("Google Translating: ", word)
-  result = translate_client.translate(word)
+  # catch an API error and try again if problems
+  sleep_time = 2
+  for i in range(11):
+    try:
+      result = translate_client.translate(word)
+    except GoogleAPIError as err:
+      sleep(sleep_time)
+      os.system(f'gcloud auth activate-service-account gpdb-cleanup@gpdb-cleanup.iam.gserviceaccount.com --key-file {key_fn}')
+      sleep_time *= 2
+      continue
+  
+  
   return result["translatedText"]
 
 ### primary data processing
