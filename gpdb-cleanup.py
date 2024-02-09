@@ -251,8 +251,19 @@ def process_names(df: pd.DataFrame,
         targets.append("no")
         confs.append(100)
         continue
-      
 
+      
+  # now handling writing to csv outside this method
+  dfnew = df.copy()
+  index_values = dfnew.index
+  dfnew["is_silent"] = pd.Series(np.array(sil), index=index_values)
+  dfnew["is_target"] = pd.Series(np.array(targets), index=index_values)
+  dfnew["target_confidence_%"] = pd.Series(np.array(confs), index=index_values)
+  dfnew["git_commit_hash"] = git_commit_hash
+
+  return dfnew
+  
+  """ keeping code for previous approach commented out for now
   #package up results and write to new CSV
   df_old = pd.read_csv(output_fn)  
   
@@ -265,7 +276,7 @@ def process_names(df: pd.DataFrame,
 
   df_output = pd.concat([df_old, dfnew])
   
-  df_output.to_csv(output_fn, index = False) #maybe move this out of the method?
+  df_output.to_csv(output_fn, index = False) #maybe move this out of the method?"""
 
 
 ### loop for working through dataset
@@ -274,6 +285,7 @@ totalStart = timeit.default_timer()
 
 i = start
 totalNames = 0
+df_old = pd.read_csv(output_fn)
 while i < df.shape[0]:
   loopStart = timeit.default_timer()
 
@@ -286,7 +298,12 @@ while i < df.shape[0]:
 
   data = format_data(df_chunk)
 
-  process_names(df_chunk, data)
+  df_chunk = process_names(df_chunk, data)
+
+  df_output = pd.concat([df_old, df_chunk])
+  df_output.to_csv(output_fn, index = False)
+
+  df_old = df_output.copy()
 
   i = end
 
