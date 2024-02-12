@@ -153,16 +153,17 @@ credentials = service_account.Credentials.from_service_account_file(
 
 # make sure you've logged into gcloud by now!
 
-def pre_transliterate(word):
+def pre_transliterate(word, maxTries=11):
   translate_client = translate.Client()
   if isinstance(word, six.binary_type):
       text = text.decode("utf-8")
   print("Google Translating: ", word)
   # catch an API error and try again if problems
   sleep_time = 2
-  for i in range(11):
+  for i in range(maxTries):
     try:
       result = translate_client.translate(word)
+      break
     except GoogleAPIError as err:
       sleep(sleep_time)
       os.system(f'gcloud auth activate-service-account gpdb-cleanup@gpdb-cleanup.iam.gserviceaccount.com --key-file {key_fn}')
