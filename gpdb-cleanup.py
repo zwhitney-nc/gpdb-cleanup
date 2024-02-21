@@ -48,11 +48,10 @@ sudo service nscd start
 
 
 """
-#TODO: rewrite to work in smaller chunks and save as you go (append csv)
 
 
 ### import packages
-from numpy import argmin, isnan, any, all, intersect1d, arange, random, array, where, logical_not, isnan, concatenate, append
+from numpy import argmin, isnan, any, all, intersect1d, arange, random, array, where, logical_not, concatenate, append
 from collections import Counter
 from itertools import compress, islice
 import pandas as pd
@@ -72,6 +71,7 @@ import timeit
 from time import sleep
 
 import os
+import traceback
 
 
 ### user variables
@@ -81,11 +81,11 @@ import os
 input_fn = "db-exports/GPDB-cleanup-prepped.csv"
 output_fn = 'db-exports/gpdb_cleanup_OUTPUT.csv'
 key_fn = "/home/ubuntu/gpdb-cleanup/certs/gpdb-cleanup-key.json"
-git_commit_hash = '26fb154'
+git_commit_hash = 'f2dea69'
 
 df = pd.read_csv(input_fn)
 #df = df[:300].copy()
-start = 199300
+start = 1824300
 step = 1000
 
 #currently just hard-coding these, but you can update if needed
@@ -116,29 +116,30 @@ def format_data(df):
   for ind, name in enumerate(names):
     rec = recs[ind]
     dt = date[ind]
-    if type(name)==float: #nan name
+    if pd.isna(name) and pd.isna(rec): #both name and rec are nan
+      name = "InvalidName " + str(ind)
+      rec = "InvalidRec " + str(ind)
+      data[name] = (rec, dt)
+      continue
+    if pd.isna(name): #nan name
       name = "InvalidName "+str(ind)
       data[name] = (rec, dt)
-      # data[name] = (rec)
       continue
     if name in data:
       name = name + str(ind)
-    if type(rec)==float or rec.isnumeric(): #nan or numerical rec link
+    if pd.isna(rec) or rec.isnumeric(): #nan or numerical rec link
       rec = "InvalidRec "+str(ind)
       data[name] = (rec, dt)
-      # data[name] = (rec)
       continue
     if name.isnumeric():
       name = "InvalidName "+str(ind)
       data[name] = (rec, dt)
-      # data[name] = (rec)
       continue
     if not rec.startswith("https://production-processed-recordings"):
       name = "IncompatibleRec "+str(ind)
     data[name] = (rec, dt)
-    # data[name] = (rec)
-  #print(dict(islice(data.items(),100)))
 
+    
   return data
 
 
@@ -194,6 +195,7 @@ def process_names(df: pd.DataFrame,
     print(name)
     #rec = data[name]
     rec = data[name][0]
+      
     if rec.startswith("Inval"):
       sil.append("N/A")
       targets.append("N/A")
@@ -299,7 +301,11 @@ while i < df.shape[0]:
 
   data = format_data(df_chunk)
 
-  df_chunk = process_names(df_chunk, data)
+  try:
+    df_chunk = process_names(df_chunk, data)
+  except Exception as e:
+    traceback.print_exception(e)
+    breakpoint()
 
   df_output = pd.concat([df_old, df_chunk])
   df_output.to_csv(output_fn, index = False)
@@ -325,3 +331,4 @@ print(f'in total, it took {totalTimeElapsed} seconds for {totalNames} names, {to
 
 
 
+  
