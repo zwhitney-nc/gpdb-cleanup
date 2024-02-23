@@ -66,6 +66,7 @@ from google.oauth2 import service_account
 import six
 from google.cloud import translate_v2 as translate
 from google.api_core.exceptions import GoogleAPIError
+from google.auth.exceptions import RefreshError
 
 import timeit
 from time import sleep
@@ -81,7 +82,7 @@ import traceback
 input_fn = "db-exports/GPDB-cleanup-prepped.csv"
 output_fn = 'db-exports/gpdb_cleanup_OUTPUT.csv'
 key_fn = "/home/ubuntu/gpdb-cleanup/certs/gpdb-cleanup-key.json"
-git_commit_hash = 'bdc3ef7'
+git_commit_hash = '244a937'
 
 df = pd.read_csv(input_fn)
 #df = df[:300].copy()
@@ -165,7 +166,7 @@ def pre_transliterate(word, maxTries=11):
     try:
       result = translate_client.translate(word)
       break
-    except GoogleAPIError as err:
+    except (GoogleAPIError, RefreshError) as err:
       sleep(sleep_time)
       os.system(f'gcloud auth activate-service-account gpdb-cleanup@gpdb-cleanup.iam.gserviceaccount.com --key-file {key_fn}')
       sleep_time *= 2
