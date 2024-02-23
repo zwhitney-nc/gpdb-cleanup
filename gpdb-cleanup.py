@@ -81,7 +81,7 @@ import traceback
 input_fn = "db-exports/GPDB-cleanup-prepped.csv"
 output_fn = 'db-exports/gpdb_cleanup_OUTPUT.csv'
 key_fn = "/home/ubuntu/gpdb-cleanup/certs/gpdb-cleanup-key.json"
-git_commit_hash = 'f2dea69'
+git_commit_hash = 'bdc3ef7'
 
 df = pd.read_csv(input_fn)
 #df = df[:300].copy()
@@ -304,8 +304,9 @@ while i < df.shape[0]:
   try:
     df_chunk = process_names(df_chunk, data)
   except Exception as e:
-    traceback.print_exception(e)
     breakpoint()
+    traceback.print_exception(e)
+
 
   df_output = pd.concat([df_old, df_chunk])
   df_output.to_csv(output_fn, index = False)
