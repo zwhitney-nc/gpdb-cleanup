@@ -85,11 +85,11 @@ from urllib3.exceptions import TimeoutError
 input_fn = "db-exports/GPDB-cleanup-prepped.csv"
 output_fn = 'db-exports/gpdb_cleanup_OUTPUT.csv'
 key_fn = "/home/ubuntu/gpdb-cleanup/certs/gpdb-cleanup-key.json"
-git_commit_hash = 'f59b86b'
+git_commit_hash = 'c49ffa9'
 
 df = pd.read_csv(input_fn)
 #df = df[:300].copy()
-start = 2004300
+start = 2152300
 step = 1000
 
 #currently just hard-coding these, but you can update if needed
@@ -272,21 +272,6 @@ def process_names(df: pd.DataFrame,
   dfnew["git_commit_hash"] = git_commit_hash
 
   return dfnew
-  
-  """ keeping code for previous approach commented out for now
-  #package up results and write to new CSV
-  df_old = pd.read_csv(output_fn)  
-  
-  dfnew = df.copy()
-  index_values = dfnew.index
-  dfnew["is_silent"] = pd.Series(np.array(sil), index=index_values)
-  dfnew["is_target"] = pd.Series(np.array(targets), index=index_values)
-  dfnew["target_confidence_%"] = pd.Series(np.array(confs), index=index_values)
-  dfnew["git_commit_hash"] = git_commit_hash
-
-  df_output = pd.concat([df_old, dfnew])
-  
-  df_output.to_csv(output_fn, index = False) #maybe move this out of the method?"""
 
 
 ### loop for working through dataset
@@ -301,7 +286,7 @@ while i < df.shape[0]:
 
   end = i + step
   if end > df.shape[0]:
-    end = (df.shape[0] - 1)
+    end = df.shape[0]
 
   df_chunk = df.iloc[i:end].copy()
   df_chunk.reset_index(drop=True, inplace=True)
