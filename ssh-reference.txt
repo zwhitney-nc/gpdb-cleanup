@@ -1,8 +1,8 @@
 ssh in terminal:
-ssh -i "certs/data-science-2024-01-12.pem" ec2-user@ec2-18-225-254-90.us-east-2.compute.amazonaws.com
+ssh -i "certs/data-science-2024-01-12.pem" ubuntu@ec2-3-128-171-184.us-east-2.compute.amazonaws.com
 
 prefix command in tramp:
-/ssh:ec2-user@ec2-18-225-254-90.us-east-2.compute.amazonaws.com:/
+/ssh:ubuntu@ec2-3-128-171-184.us-east-2.compute.amazonaws.com:/
 
 scp format:
-scp -i "certs/data-science-2024-01-12.pem" ec2-user@ec2-18-225-254-90.us-east-2.compute.amazonaws.com:~/
+scp -i "certs/data-science-2024-01-12.pem" ubuntu@ec2-3-128-171-184.us-east-2.compute.amazonaws.com:~/

@@ -13,3 +13,4 @@ gpdb-cleanup-key.json
 *.pyc
 .DS_Store
 __pycache__
+/osdc_cheatsheet-tmux-2021.6.25.pdf
