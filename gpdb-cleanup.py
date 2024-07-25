@@ -9,20 +9,42 @@ replace "gpdb-cleanup-key.json" with path to your credentials
 make sure gcloud cli is installed:
 https://cloud.google.com/sdk/docs/install-sdk
 
-make sure FFMPEG CLI and nscd are installed (links/commands below assume
-Amazon Linux 2023 AMI):
+make sure FFMPEG CLI and nscd are installed:
+(Amazon Linux 2023)
 FFMPEG CLI: https://johnvansickle.com/ffmpeg/
-
 sudo dnf install nscd
 
+(Ubuntu)
+sudo apt install ffmpeg
 
-Blow terminal commands are currently included in this script, but you
+
+set up torch and CUDA:
+(see here for more info: https://medium.com/@awcalibr/running-whisper-speech-to-text-recognition-in-aws-4f511e3cb4cb)
+
+pip3 install torch torchvision torchaudio
+sudo apt install nvidia-driver-525
+sudo reboot (will need to wait a few minutes before sshing back in)
+
+nvidia-smi (to check installation succeeded)
+
+sudo apt install nvidia-cuda-toolkit
+(can verify with "nvcc --version")
+
+in Python, check sucessful installation with (should return True):
+import torch
+torch.cuda.is_available()
+
+
+Below terminal commands are currently included in this script, but you
 may need to adjust them for your system
-log into gcloud (in terminal):
-gcloud auth activate-service-account gpdb-cleanup@gpdb-cleanup.iam.gserviceaccount.com --key-file gpdb-cleanup-key.json
+make sure you're in the gpdb-cleanup folder
 
+log into gcloud (in terminal):
+gcloud auth activate-service-account gpdb-cleanup@gpdb-cleanup.iam.gserviceaccount.com --key-file certs/gpdb-cleanup-key.json
+
+(Amazon Linux 2023 only)
 start nscd (in terminal):
-sudo service nscd start
+sudo service nscd start 
 
 
 """
@@ -52,10 +74,12 @@ import os
 
 ### user variables
 #check these before running
-#breakpoint()
+breakpoint()
 
 input_fn = "db-exports/GPDB-cleanup-prepped.csv"
 output_fn = 'db-exports/gpdb_cleanup_OUTPUT.csv'
+key_fn = "/home/ubuntu/gpdb-cleanup/certs/gpdb-cleanup-key.json"
+git_commit_hash = 'e536cc119628b22a82f8cc07a0730584bf47b6af'
 
 df = pd.read_csv(input_fn)
 df = df[:300].copy()
@@ -63,8 +87,8 @@ start = 200
 step = 100
 
 #currently just hard-coding these, but you can update if needed
-os.system('gcloud auth activate-service-account gpdb-cleanup@gpdb-cleanup.iam.gserviceaccount.com --key-file gpdb-cleanup-key.json')
-os.system('sudo service nscd start')
+os.system(f'gcloud auth activate-service-account gpdb-cleanup@gpdb-cleanup.iam.gserviceaccount.com --key-file {key_fn}')
+#os.system('sudo service nscd start')
 
 
 ### read in data and reformat
@@ -118,12 +142,12 @@ def format_data(df):
 
 ### whisper and Google API setup
 
-model = whisper.load_model("small")
+model = whisper.load_model("small", device="cuda")
 
 ad = AlphabetDetector()
 
 credentials = service_account.Credentials.from_service_account_file(
-    "gpdb-cleanup-key.json")
+    key_fn)
 
 # make sure you've logged into gcloud by now!
 
